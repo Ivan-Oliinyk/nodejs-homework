@@ -23,7 +23,7 @@ const getOneContact = async (req, res, next) => {
 
     if (!contact) {
       return res.json({
-        status: "success",
+        status: "error",
         code: 404,
         message: `Contacts with id ${contactId} id not found`,
       });
