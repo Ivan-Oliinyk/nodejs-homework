@@ -1,14 +1,14 @@
 const {
-  listContacts,
+  getContacts,
   getContactById,
   addContact,
   removeContact,
   update,
-} = require("../models/contacts");
+} = require("../services/contacts.service");
 
 const getAllContacts = async (req, res, next) => {
   try {
-    const contacts = await listContacts();
+    const contacts = await getContacts();
     return res.json({ status: "success", code: 200, data: contacts });
   } catch (err) {
     next(err);
@@ -41,39 +41,14 @@ const createContact = async (req, res, next) => {
 
     if (!name || !phone || !email) {
       return res.json({
-        status: "success",
+        status: "error",
         code: 400,
         message: "missing required name field",
       });
     }
 
-    const contact = await addContact(req.body);
+    const contact = await addContact({ name, phone, email });
     return res.json({ status: "success", code: 201, data: contact });
-  } catch (err) {
-    next(err);
-  }
-};
-
-const deleteContact = async (req, res, next) => {
-  const { contactId } = req.params;
-
-  try {
-    const contact = await removeContact(contactId);
-
-    if (!contact) {
-      return res.json({
-        status: "success",
-        code: 404,
-        message: `Contacts with id ${contactId} id not found`,
-      });
-    }
-
-    return res.json({
-      status: "success",
-      code: 200,
-      data: contact,
-      message: `Contacts with id ${contactId} was deleted`,
-    });
   } catch (err) {
     next(err);
   }
@@ -90,7 +65,31 @@ const updateContact = async (req, res, next) => {
 
     if (!contact) {
       return res.json({
-        status: "success",
+        status: "error",
+        code: 404,
+        message: `Contacts with id ${contactId} id not found`,
+      });
+    }
+
+    return res.json({
+      status: "success",
+      code: 200,
+      message: `Contacts with id ${contactId} was updated`,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const deleteContact = async (req, res, next) => {
+  const { contactId } = req.params;
+
+  try {
+    const contact = await removeContact(contactId);
+
+    if (!contact) {
+      return res.json({
+        status: "error",
         code: 404,
         message: `Contacts with id ${contactId} id not found`,
       });
@@ -100,7 +99,7 @@ const updateContact = async (req, res, next) => {
       status: "success",
       code: 200,
       data: contact,
-      message: `Contacts with id ${contactId} was updated`,
+      message: `Contacts with id ${contactId} was deleted`,
     });
   } catch (err) {
     next(err);
